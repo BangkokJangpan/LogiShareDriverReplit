@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 96%);
+  --foreground: hsl(0 0% 13%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 13%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 13%);
+  --primary: hsl(123 42% 33%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(207 90% 54%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(0 0% 96%);
+  --muted-foreground: hsl(0 0% 45%);
+  --accent: hsl(0 0% 96%);
+  --accent-foreground: hsl(0 0% 13%);
+  --destructive: hsl(4 90% 58%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --success: hsl(122 39% 49%);
+  --success-foreground: hsl(0 0% 98%);
+  --warning: hsl(36 100% 50%);
+  --warning-foreground: hsl(0 0% 98%);
+  --border: hsl(0 0% 90%);
+  --input: hsl(0 0% 90%);
+  --ring: hsl(123 42% 33%);
+  --chart-1: hsl(123 42% 33%);
+  --chart-2: hsl(122 39% 49%);
+  --chart-3: hsl(36 100% 50%);
+  --chart-4: hsl(207 90% 54%);
+  --chart-5: hsl(4 90% 58%);
+  --sidebar: hsl(0 0% 96%);
+  --sidebar-foreground: hsl(0 0% 13%);
+  --sidebar-primary: hsl(123 42% 33%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(0 0% 96%);
+  --sidebar-accent-foreground: hsl(0 0% 13%);
+  --sidebar-border: hsl(0 0% 90%);
+  --sidebar-ring: hsl(123 42% 33%);
+  --font-sans: "Roboto", "Noto Sans KR", sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 8px;
+  --shadow-2xs: 0px 2px 0px 0px hsl(123 42% 33% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(123 42% 33% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(123 42% 33% / 0.00), 0px 1px 2px -1px hsl(123 42% 33% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(123 42% 33% / 0.00), 0px 1px 2px -1px hsl(123 42% 33% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(123 42% 33% / 0.00), 0px 2px 4px -1px hsl(123 42% 33% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(123 42% 33% / 0.00), 0px 4px 6px -1px hsl(123 42% 33% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(123 42% 33% / 0.00), 0px 8px 10px -1px hsl(123 42% 33% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(123 42% 33% / 0.00);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(0 0% 91%);
+  --card: hsl(0 0% 4%);
+  --card-foreground: hsl(0 0% 91%);
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(0 0% 91%);
+  --primary: hsl(123 42% 40%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(207 90% 60%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(0 0% 9%);
+  --muted-foreground: hsl(0 0% 46%);
+  --accent: hsl(0 0% 9%);
+  --accent-foreground: hsl(0 0% 91%);
+  --destructive: hsl(4 90% 58%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --success: hsl(122 39% 55%);
+  --success-foreground: hsl(0 0% 98%);
+  --warning: hsl(36 100% 55%);
+  --warning-foreground: hsl(0 0% 98%);
+  --border: hsl(0 0% 15%);
+  --input: hsl(0 0% 15%);
+  --ring: hsl(123 42% 40%);
+  --chart-1: hsl(123 42% 40%);
+  --chart-2: hsl(122 39% 55%);
+  --chart-3: hsl(36 100% 55%);
+  --chart-4: hsl(207 90% 60%);
+  --chart-5: hsl(4 90% 58%);
+  --sidebar: hsl(0 0% 4%);
+  --sidebar-foreground: hsl(0 0% 91%);
+  --sidebar-primary: hsl(123 42% 40%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(0 0% 9%);
+  --sidebar-accent-foreground: hsl(0 0% 91%);
+  --sidebar-border: hsl(0 0% 15%);
+  --sidebar-ring: hsl(123 42% 40%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+.map-container {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.delivery-route {
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  right: 10%;
+  height: 60%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10 20 Q50 10 90 30 Q70 50 50 80 Q30 70 10 50" stroke="%232E7D32" stroke-width="2" fill="none" stroke-dasharray="5,5"/></svg>') center/contain no-repeat;
+}
