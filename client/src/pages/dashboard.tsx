@@ -10,11 +10,11 @@ export default function Dashboard() {
   const driverId = "driver@logishare.com"; // In real app, get from auth context
 
   const { data: profile, isLoading: profileLoading } = useQuery<DriverProfile>({
-    queryKey: ["/api/drivers", driverId, "profile"],
+    queryKey: ["/api/drivers-by-email", driverId, "profile"],
   });
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<OrderWithEarnings[]>({
-    queryKey: ["/api/drivers", driverId, "orders"],
+    queryKey: ["/api/drivers-by-email", driverId, "orders"],
   });
 
   const currentOrder = orders.find(order => order.status === "in_transit" || order.status === "accepted");

@@ -46,6 +46,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get driver profile by email
+  app.get("/api/drivers-by-email/:email/profile", async (req, res) => {
+    try {
+      const driver = await storage.getDriverByEmail(req.params.email);
+      if (!driver) {
+        return res.status(404).json({ message: "Driver not found" });
+      }
+      const profile = await storage.getDriverProfile(driver.id);
+      if (!profile) {
+        return res.status(404).json({ message: "Driver profile not found" });
+      }
+      res.json(profile);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get driver orders by email
+  app.get("/api/drivers-by-email/:email/orders", async (req, res) => {
+    try {
+      const driver = await storage.getDriverByEmail(req.params.email);
+      if (!driver) {
+        return res.status(404).json({ message: "Driver not found" });
+      }
+      const orders = await storage.getOrdersByDriverId(driver.id);
+      res.json(orders);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get driver earnings by email
+  app.get("/api/drivers-by-email/:email/earnings/:period", async (req, res) => {
+    try {
+      const driver = await storage.getDriverByEmail(req.params.email);
+      if (!driver) {
+        return res.status(404).json({ message: "Driver not found" });
+      }
+      
+      const { period } = req.params;
+      let earnings;
+      
+      switch (period) {
+        case "weekly":
+          earnings = await storage.getWeeklyEarnings(driver.id);
+          break;
+        case "monthly":
+          // For now, return all earnings (could implement monthly filter later)
+          earnings = await storage.getEarningsByDriverId(driver.id);
+          break;
+        default:
+          earnings = await storage.getEarningsByDriverId(driver.id);
+      }
+      
+      res.json(earnings);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.post("/api/drivers", async (req, res) => {
     try {
       const validatedData = insertDriverSchema.parse(req.body);

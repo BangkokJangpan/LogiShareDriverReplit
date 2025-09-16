@@ -9,7 +9,7 @@ export default function Earnings() {
   const [period, setPeriod] = useState("weekly");
 
   const { data: earnings = [], isLoading } = useQuery<Earning[]>({
-    queryKey: ["/api/drivers", driverId, "earnings", period],
+    queryKey: ["/api/drivers-by-email", driverId, "earnings", period],
   });
 
   // Calculate weekly totals (mock data for display)

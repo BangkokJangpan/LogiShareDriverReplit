@@ -9,7 +9,7 @@ export default function Profile() {
   const driverId = "driver@logishare.com"; // In real app, get from auth context
 
   const { data: profile, isLoading } = useQuery<DriverProfile>({
-    queryKey: ["/api/drivers", driverId, "profile"],
+    queryKey: ["/api/drivers-by-email", driverId, "profile"],
   });
 
   if (isLoading) {

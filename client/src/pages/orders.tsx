@@ -17,7 +17,7 @@ export default function Orders() {
   });
 
   const { data: driverOrders = [] } = useQuery<OrderWithEarnings[]>({
-    queryKey: ["/api/drivers", driverId, "orders"],
+    queryKey: ["/api/drivers-by-email", driverId, "orders"],
   });
 
   const acceptOrderMutation = useMutation({
@@ -27,7 +27,7 @@ export default function Orders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders/pending"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/drivers", driverId, "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/drivers-by-email", driverId, "orders"] });
       toast({
         title: "주문 수락 완료",
         description: "새로운 배송이 할당되었습니다.",
