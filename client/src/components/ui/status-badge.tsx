@@ -3,7 +3,7 @@ import { Clock, CheckCircle, Truck, Package, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
-  status: "pending" | "accepted" | "picked_up" | "in_transit" | "delivered" | "cancelled";
+  status: string;
   className?: string;
 }
 

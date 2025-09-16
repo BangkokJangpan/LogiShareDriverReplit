@@ -147,8 +147,14 @@ export class MemStorage implements IStorage {
   async createDriver(insertDriver: InsertDriver): Promise<Driver> {
     const id = randomUUID();
     const driver: Driver = {
-      ...insertDriver,
       id,
+      name: insertDriver.name,
+      email: insertDriver.email,
+      phone: insertDriver.phone,
+      rating: insertDriver.rating || null,
+      totalDeliveries: insertDriver.totalDeliveries || null,
+      completionRate: insertDriver.completionRate || null,
+      isOnline: insertDriver.isOnline || null,
       createdAt: new Date(),
     };
     this.drivers.set(id, driver);
@@ -237,8 +243,16 @@ export class MemStorage implements IStorage {
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
     const order: Order = {
-      ...insertOrder,
       id,
+      orderNumber: insertOrder.orderNumber,
+      driverId: insertOrder.driverId || null,
+      pickupLocation: insertOrder.pickupLocation,
+      deliveryLocation: insertOrder.deliveryLocation,
+      status: insertOrder.status || "pending",
+      estimatedTime: insertOrder.estimatedTime || null,
+      distance: insertOrder.distance || null,
+      fee: insertOrder.fee,
+      photoUrl: insertOrder.photoUrl || null,
       createdAt: new Date(),
       completedAt: null,
     };
@@ -281,7 +295,7 @@ export class MemStorage implements IStorage {
     const targetDate = new Date(date);
     return Array.from(this.earnings.values()).filter(earning => 
       earning.driverId === driverId && 
-      earning.date.toDateString() === targetDate.toDateString()
+      earning.date && earning.date.toDateString() === targetDate.toDateString()
     );
   }
 
@@ -291,7 +305,7 @@ export class MemStorage implements IStorage {
     
     return Array.from(this.earnings.values()).filter(earning => 
       earning.driverId === driverId && 
-      earning.date >= weekAgo
+      earning.date && earning.date >= weekAgo
     );
   }
 }
