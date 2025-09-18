@@ -1,5 +1,9 @@
-import { type Driver, type InsertDriver, type Vehicle, type InsertVehicle, type License, type InsertLicense, type Order, type InsertOrder, type Earning, type InsertEarning, type DriverProfile, type OrderWithEarnings } from "@shared/schema";
+import { type Driver, type InsertDriver, type Vehicle, type InsertVehicle, type License, type InsertLicense, type Order, type InsertOrder, type Earning, type InsertEarning, type DriverProfile, type OrderWithEarnings, drivers, vehicles, licenses, orders, earnings } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { eq, and, gte, lt } from "drizzle-orm";
+import ws from "ws";
 
 export interface IStorage {
   // Driver operations
@@ -310,4 +314,184 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// PostgreSQL Database Storage Implementation
+export class PostgreSQLStorage implements IStorage {
+  private db;
+
+  constructor() {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is required");
+    }
+    
+    // Configure Neon WebSocket for Node.js environment
+    neonConfig.webSocketConstructor = ws;
+    
+    const pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+    });
+    this.db = drizzle(pool);
+  }
+
+  async getDriver(id: string): Promise<Driver | undefined> {
+    const result = await this.db.select().from(drivers).where(eq(drivers.id, id)).limit(1);
+    return result[0] || undefined;
+  }
+
+  async getDriverByEmail(email: string): Promise<Driver | undefined> {
+    const result = await this.db.select().from(drivers).where(eq(drivers.email, email)).limit(1);
+    return result[0] || undefined;
+  }
+
+  async createDriver(insertDriver: InsertDriver): Promise<Driver> {
+    const result = await this.db.insert(drivers).values(insertDriver).returning();
+    return result[0];
+  }
+
+  async updateDriver(id: string, updates: Partial<Driver>): Promise<Driver> {
+    const result = await this.db.update(drivers).set(updates).where(eq(drivers.id, id)).returning();
+    if (result.length === 0) {
+      throw new Error("Driver not found");
+    }
+    return result[0];
+  }
+
+  async getDriverProfile(driverId: string): Promise<DriverProfile | undefined> {
+    const driver = await this.getDriver(driverId);
+    if (!driver) return undefined;
+
+    const vehicle = await this.getVehicleByDriverId(driverId);
+    const license = await this.getLicenseByDriverId(driverId);
+
+    return {
+      ...driver,
+      vehicle,
+      license,
+    };
+  }
+
+  async getVehicleByDriverId(driverId: string): Promise<Vehicle | undefined> {
+    const result = await this.db.select().from(vehicles).where(eq(vehicles.driverId, driverId)).limit(1);
+    return result[0] || undefined;
+  }
+
+  async createVehicle(insertVehicle: InsertVehicle): Promise<Vehicle> {
+    const result = await this.db.insert(vehicles).values(insertVehicle).returning();
+    return result[0];
+  }
+
+  async updateVehicle(id: string, updates: Partial<Vehicle>): Promise<Vehicle> {
+    const result = await this.db.update(vehicles).set(updates).where(eq(vehicles.id, id)).returning();
+    if (result.length === 0) {
+      throw new Error("Vehicle not found");
+    }
+    return result[0];
+  }
+
+  async getLicenseByDriverId(driverId: string): Promise<License | undefined> {
+    const result = await this.db.select().from(licenses).where(eq(licenses.driverId, driverId)).limit(1);
+    return result[0] || undefined;
+  }
+
+  async createLicense(insertLicense: InsertLicense): Promise<License> {
+    const result = await this.db.insert(licenses).values(insertLicense).returning();
+    return result[0];
+  }
+
+  async updateLicense(id: string, updates: Partial<License>): Promise<License> {
+    const result = await this.db.update(licenses).set(updates).where(eq(licenses.id, id)).returning();
+    if (result.length === 0) {
+      throw new Error("License not found");
+    }
+    return result[0];
+  }
+
+  async getOrder(id: string): Promise<Order | undefined> {
+    const result = await this.db.select().from(orders).where(eq(orders.id, id)).limit(1);
+    return result[0] || undefined;
+  }
+
+  async getOrdersByDriverId(driverId: string): Promise<OrderWithEarnings[]> {
+    const orderResults = await this.db.select().from(orders).where(eq(orders.driverId, driverId));
+    
+    const ordersWithEarnings: OrderWithEarnings[] = [];
+    for (const order of orderResults) {
+      const earningResult = await this.db.select().from(earnings).where(eq(earnings.orderId, order.id)).limit(1);
+      ordersWithEarnings.push({
+        ...order,
+        earnings: earningResult[0] || undefined,
+      });
+    }
+    
+    return ordersWithEarnings;
+  }
+
+  async getPendingOrders(): Promise<Order[]> {
+    const result = await this.db.select().from(orders).where(eq(orders.status, "pending"));
+    return result;
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const result = await this.db.insert(orders).values(insertOrder).returning();
+    return result[0];
+  }
+
+  async updateOrder(id: string, updates: Partial<Order>): Promise<Order> {
+    const updateData = { ...updates };
+    if (updates.status === "delivered") {
+      updateData.completedAt = new Date();
+    }
+    
+    const result = await this.db.update(orders).set(updateData).where(eq(orders.id, id)).returning();
+    if (result.length === 0) {
+      throw new Error("Order not found");
+    }
+    return result[0];
+  }
+
+  async acceptOrder(orderId: string, driverId: string): Promise<Order> {
+    return this.updateOrder(orderId, { driverId, status: "accepted" });
+  }
+
+  async getEarningsByDriverId(driverId: string): Promise<Earning[]> {
+    const result = await this.db.select().from(earnings).where(eq(earnings.driverId, driverId));
+    return result;
+  }
+
+  async createEarning(insertEarning: InsertEarning): Promise<Earning> {
+    const result = await this.db.insert(earnings).values(insertEarning).returning();
+    return result[0];
+  }
+
+  async getDailyEarnings(driverId: string, date: string): Promise<Earning[]> {
+    const targetDate = new Date(date);
+    const nextDay = new Date(targetDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    
+    const result = await this.db.select().from(earnings)
+      .where(
+        and(
+          eq(earnings.driverId, driverId),
+          gte(earnings.date, targetDate),
+          lt(earnings.date, nextDay)
+        )
+      );
+    return result;
+  }
+
+  async getWeeklyEarnings(driverId: string): Promise<Earning[]> {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    
+    const result = await this.db.select().from(earnings)
+      .where(
+        and(
+          eq(earnings.driverId, driverId),
+          gte(earnings.date, weekAgo)
+        )
+      );
+    return result;
+  }
+}
+
+// Use PostgreSQL storage instead of memory storage
+export const storage = new PostgreSQLStorage();
